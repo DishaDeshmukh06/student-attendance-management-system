@@ -1,32 +1,34 @@
-# 📚 Student Attendance Management System
+# Student Attendance Management System
 
-A web-based **Student Attendance Management System** developed using **Node.js**, **Express.js**, **SQLite**, **HTML**, **CSS**, and **JavaScript**. The application helps educational institutions efficiently manage student records, attendance, and academic information through an intuitive and user-friendly interface.
-
----
-
-## ✨ Features
-
-- 🔐 Secure User Authentication
-- 👨‍🎓 Student Registration & Management
-- 📅 Daily Attendance Management
-- ✏️ Add, Edit & Delete Student Records
-- 🔍 Search Students
-- 📊 Dashboard Overview
-- 💾 SQLite Database Integration
-- 📱 Responsive User Interface
+A web-based **Student Attendance Management System** built with **Node.js**, **Express.js**, and **SQLite** to simplify student record management and attendance tracking. The application provides an intuitive interface for maintaining student information, recording daily attendance, and managing academic data efficiently.
 
 ---
 
-## 🛠 Tech Stack
+## Features
 
-- **Backend:** Node.js, Express.js
-- **Database:** SQLite
-- **Frontend:** HTML5, CSS3, JavaScript
-- **Package Manager:** npm
+- Secure user authentication
+- Student registration and profile management
+- Daily attendance recording
+- View, update, and delete student records
+- Search and filter student information
+- Dashboard for attendance management
+- SQLite database integration
+- Responsive web interface
 
 ---
 
-## 📂 Project Structure
+## Technology Stack
+
+| Category | Technologies |
+|----------|--------------|
+| Backend | Node.js, Express.js |
+| Frontend | HTML5, CSS3, JavaScript |
+| Database | SQLite |
+| Package Manager | npm |
+
+---
+
+## Project Structure
 
 ```
 student-attendance-management-system/
@@ -35,41 +37,38 @@ student-attendance-management-system/
 │   ├── css/
 │   ├── js/
 │   └── images/
-│
 ├── routes/
-│
 ├── server.js
 ├── database.js
 ├── package.json
 ├── package-lock.json
 ├── tgpcms.db
-├── .env
 └── README.md
 ```
 
 ---
 
-## 🚀 Installation
+## Installation
 
-### 1. Clone the Repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/DishaDeshmukh06/student-attendance-management-system.git
 ```
 
-### 2. Navigate to the Project Folder
+### Navigate to the project directory
 
 ```bash
 cd student-attendance-management-system
 ```
 
-### 3. Install Dependencies
+### Install dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Start the Server
+### Start the application
 
 ```bash
 node server.js
@@ -83,9 +82,9 @@ npm start
 
 ---
 
-## 🌐 Access the Application
+## Usage
 
-Open your browser and visit:
+After starting the server, open your browser and navigate to:
 
 ```
 http://localhost:3000
@@ -93,35 +92,36 @@ http://localhost:3000
 
 ---
 
-## 📸 Screenshots
+## Key Functionalities
 
-- Login Page
-- Dashboard
 - Student Management
-- Attendance Management
-- Search Students
+- Attendance Recording
+- Attendance History
+- Search Functionality
+- Database Management
+- User Authentication
 
 ---
 
-## 🔮 Future Enhancements
+## Future Improvements
 
-- Role-Based Authentication (Admin, Teacher, Student)
-- Attendance Reports
-- PDF Export
+- Role-Based Access Control
+- Attendance Analytics
+- PDF Report Generation
 - Email Notifications
 - REST API Integration
 - Cloud Database Support
 
 ---
 
-## 👩‍💻 Author
+## Author
 
 **Disha Deshmukh**
 
-- GitHub: https://github.com/DishaDeshmukh06
+GitHub: https://github.com/DishaDeshmukh06
 
 ---
 
-## 📄 License
+## License
 
 This project is intended for educational and portfolio purposes.
