@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TGPCMS — Attendance</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#020b18;--card:#07192e;--card2:#091e36;
+  --border:#112d4e;--border2:#0d2540;
+  --blue:#1a6bff;--blue2:#0f4fcb;--cyan:#00d4ff;
+  --green:#00e096;--amber:#ffb830;--red:#ff4f4f;--purple:#a855f7;
+  --text:#ddeeff;--muted:#4a7090;--muted2:#2a4a65;
+  --sidebar:220px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Outfit',sans-serif;background:var(--navy);color:var(--text);display:flex}
+
+/* ── SIDEBAR (same as other pages) ── */
+.sidebar{width:var(--sidebar);min-height:100vh;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100}
+.sb-logo{padding:24px 20px 20px;border-bottom:1px solid var(--border2)}
+.sb-logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#fff;box-shadow:0 0 18px rgba(26,107,255,0.4);margin-bottom:10px;letter-spacing:-1px}
+.sb-logo-name{font-size:0.78rem;font-weight:700;color:var(--text);line-height:1.4}
+.sb-logo-sub{font-size:0.65rem;color:var(--muted);margin-top:1px}
+.sb-nav{flex:1;padding:16px 10px;overflow-y:auto}
+.sb-section{font-size:0.6rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted2);padding:0 10px;margin:16px 0 6px}
+.sb-section:first-child{margin-top:0}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;font-size:0.84rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.18s;text-decoration:none;margin-bottom:2px;position:relative}
+.nav-item:hover{background:rgba(26,107,255,0.08);color:var(--text)}
+.nav-item.active{background:rgba(26,107,255,0.14);color:var(--blue)}
+.nav-item.active::before{content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;background:var(--blue);border-radius:0 3px 3px 0}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--border2)}
+.sb-user{display:flex;align-items:center;gap:10px}
+.sb-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;color:#fff;flex-shrink:0}
+.sb-user-name{font-size:0.82rem;font-weight:600;color:var(--text)}
+.sb-user-role{font-size:0.68rem;color:var(--muted)}
+.logout-btn{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;display:flex;align-items:center;transition:color 0.2s}
+.logout-btn:hover{color:var(--red)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar);flex:1;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:62px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:14px;position:sticky;top:0;z-index:50;flex-shrink:0}
+.topbar-title{font-size:1.05rem;font-weight:700;color:var(--text);flex:1}
+.topbar-title span{color:var(--muted);font-weight:400;font-size:0.85rem;margin-left:8px}
+.tb-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;font-family:'Outfit',sans-serif;font-size:0.82rem;font-weight:600;cursor:pointer;transition:all 0.18s;border:none}
+.tb-btn.primary{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 4px 14px rgba(26,107,255,0.3)}
+.tb-btn.primary:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(26,107,255,0.4)}
+.tb-btn.success{background:linear-gradient(135deg,#00b377,var(--green));color:#fff;box-shadow:0 4px 14px rgba(0,224,150,0.25)}
+.tb-btn.success:hover{transform:translateY(-1px)}
+.tb-btn.sec{background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border)}
+.tb-btn.sec:hover{border-color:var(--blue);color:var(--blue)}
+.tb-btn svg{width:15px;height:15px}
+
+.content{flex:1;overflow-y:auto;padding:26px 28px}
+
+/* ── SESSION BAR ── */
+.session-bar{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:20px 24px;
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:20px;flex-wrap:wrap;
+}
+.sb-field{display:flex;flex-direction:column;gap:5px}
+.sb-field label{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2)}
+.sb-field input,.sb-field select{
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:9px;padding:9px 13px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:0.85rem;outline:none;
+  transition:border-color 0.2s;min-width:160px;
+}
+.sb-field input:focus,.sb-field select:focus{border-color:var(--blue)}
+.sb-field select option{background:var(--card)}
+.sb-divider{width:1px;height:44px;background:var(--border);flex-shrink:0}
+.sb-load-btn{
+  margin-left:auto;
+  padding:10px 22px;border-radius:9px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:#fff;border:none;font-family:'Outfit',sans-serif;
+  font-size:0.85rem;font-weight:700;cursor:pointer;
+  transition:all 0.18s;box-shadow:0 4px 14px rgba(26,107,255,0.3);
+  white-space:nowrap;
+}
+.sb-load-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(26,107,255,0.4)}
+
+/* ── SUMMARY CARDS ── */
+.summary-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;text-align:center}
+.sum-num{font-family:'Space Mono',monospace;font-size:1.4rem;font-weight:700;margin-bottom:3px}
+.sum-lbl{font-size:0.68rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.08em}
+.sum-card.total .sum-num{color:var(--text)}
+.sum-card.present .sum-num{color:var(--green)}
+.sum-card.absent .sum-num{color:var(--red)}
+.sum-card.pct .sum-num{color:var(--cyan)}
+.sum-card.unmarked .sum-num{color:var(--amber)}
+
+/* ── BULK ACTIONS ── */
+.bulk-bar{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:12px 18px;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.bulk-bar span{font-size:0.82rem;color:var(--muted);flex:1}
+.bulk-bar span strong{color:var(--text)}
+.b-btn{
+  padding:7px 16px;border-radius:8px;
+  font-family:'Outfit',sans-serif;font-size:0.8rem;font-weight:600;
+  cursor:pointer;transition:all 0.18s;border:none;
+  display:flex;align-items:center;gap:6px;
+}
+.b-btn svg{width:13px;height:13px}
+.b-btn.all-p{background:rgba(0,224,150,0.12);color:var(--green)}
+.b-btn.all-p:hover{background:rgba(0,224,150,0.22)}
+.b-btn.all-a{background:rgba(255,79,79,0.12);color:var(--red)}
+.b-btn.all-a:hover{background:rgba(255,79,79,0.22)}
+.b-btn.reset{background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border)}
+.b-btn.reset:hover{color:var(--text)}
+.search-att{
+  background:rgba(255,255,255,0.04);border:1px solid var(--border);
+  border-radius:8px;padding:7px 13px;color:var(--text);
+  font-family:'Outfit',sans-serif;font-size:0.82rem;outline:none;width:200px;
+}
+.search-att::placeholder{color:var(--muted2)}
+.search-att:focus{border-color:var(--blue)}
+
+/* ── ATTENDANCE TABLE ── */
+.att-table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.att-table{width:100%;border-collapse:collapse}
+.att-table thead tr{background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border)}
+.att-table th{font-size:0.65rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);padding:13px 16px;text-align:left;white-space:nowrap}
+.att-table td{padding:11px 16px;font-size:0.83rem;color:var(--text);border-bottom:1px solid var(--border2);vertical-align:middle}
+.att-table tbody tr:last-child td{border-bottom:none}
+.att-table tbody tr:hover td{background:rgba(26,107,255,0.03)}
+.std-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0}
+.name-cell{display:flex;align-items:center;gap:10px}
+.std-roll{font-size:0.68rem;color:var(--muted);font-family:'Space Mono',monospace}
+
+/* toggle switch */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle{position:relative;width:100px;height:34px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{
+  position:absolute;inset:0;border-radius:34px;
+  background:rgba(255,79,79,0.15);border:1px solid rgba(255,79,79,0.3);
+  cursor:pointer;transition:all 0.25s;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 10px;
+}
+.toggle input:checked~.toggle-track{
+  background:rgba(0,224,150,0.15);border-color:rgba(0,224,150,0.35);
+}
+.toggle-knob{
+  position:absolute;top:4px;left:4px;
+  width:26px;height:26px;border-radius:50%;
+  background:var(--red);transition:all 0.25s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+.toggle input:checked~.toggle-knob{
+  left:calc(100% - 30px);background:var(--green);
+}
+.toggle-label-a{font-size:0.68rem;font-weight:700;color:rgba(255,79,79,0.7);margin-left:auto;pointer-events:none;transition:opacity 0.2s}
+.toggle-label-p{font-size:0.68rem;font-weight:700;color:rgba(0,224,150,0.7);pointer-events:none;transition:opacity 0.2s}
+.toggle input:checked~.toggle-track .toggle-label-a{opacity:0.3}
+.toggle input:not(:checked)~.toggle-track .toggle-label-p{opacity:0.3}
+
+/* status cell */
+.status-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 12px;border-radius:20px;
+  font-size:0.72rem;font-weight:700;
+  font-family:'Space Mono',monospace;
+}
+.status-badge.present{background:rgba(0,224,150,0.12);color:var(--green)}
+.status-badge.absent{background:rgba(255,79,79,0.12);color:var(--red)}
+.status-badge.unmarked{background:rgba(255,184,48,0.1);color:var(--amber)}
+
+/* prev att bar */
+.prev-att{display:flex;align-items:center;gap:8px}
+.prev-bar{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.07);overflow:hidden;min-width:60px}
+.prev-fill{height:100%;border-radius:2px}
+.prev-num{font-family:'Space Mono',monospace;font-size:0.72rem;min-width:36px;text-align:right}
+
+/* submitted overlay */
+.submitted-overlay{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;gap:16px;
+}
+.submitted-overlay.show{display:flex}
+.so-icon{width:64px;height:64px;border-radius:50%;background:rgba(0,224,150,0.12);display:flex;align-items:center;justify-content:center}
+.so-icon svg{width:28px;height:28px;color:var(--green)}
+.so-title{font-size:1.1rem;font-weight:800;color:#fff}
+.so-sub{font-size:0.85rem;color:var(--muted);text-align:center}
+
+/* history table */
+.hist-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-top:18px;overflow:hidden}
+.hist-head{padding:16px 20px;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between}
+.hist-head h3{font-size:0.9rem;font-weight:700}
+.hist-table{width:100%;border-collapse:collapse}
+.hist-table th{font-size:0.64rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted2);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border2)}
+.hist-table td{padding:11px 16px;font-size:0.81rem;color:var(--text);border-bottom:1px solid var(--border2)}
+.hist-table tbody tr:last-child td{border-bottom:none}
+.hist-table tr:hover td{background:rgba(26,107,255,0.03)}
+
+/* toast */
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:13px 18px;display:flex;align-items:center;gap:10px;font-size:0.84rem;color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:all 0.3s ease;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(0,224,150,0.3)}
+.toast.error{border-color:rgba(255,79,79,0.3)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.att-table tbody tr{animation:fadeUp 0.25s ease both}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">TGP</div>
+    <div class="sb-logo-name">TGPCMS Portal</div>
+    <div class="sb-logo-sub">Attendance Management</div>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Main</div>
+    <a class="nav-item" href="dashboard.html">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a class="nav-item" href="students.html">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197"/></svg>
+      Students
+    </a>
+    <a class="nav-item active" href="attendance.html">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Attendance
+    </a>
+    <a class="nav-item" href="#">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Reports
+    </a>
+    <div class="sb-section">Management</div>
+    <a class="nav-item" href="#">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">AD</div>
+      <div><div class="sb-user-name">Admin User</div><div class="sb-user-role">Administrator</div></div>
+      <button class="logout-btn" onclick="logout()">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Attendance <span>Mark &amp; Track</span></div>
+    <input class="search-att" type="text" id="searchAtt" placeholder="🔍  Search student..." oninput="filterRows()"/>
+    <button class="tb-btn sec" onclick="exportCSV()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Export CSV
+    </button>
+    <button class="tb-btn success" onclick="submitAttendance()" id="submitBtn" disabled>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Submit Attendance
+    </button>
+  </div>
+
+  <div class="content">
+
+    <!-- Session Bar -->
+    <div class="session-bar">
+      <div class="sb-field">
+        <label>Date</label>
+        <input type="date" id="attDate"/>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-field">
+        <label>Subject</label>
+        <select id="attSubject">
+          <option value="">Select Subject</option>
+          <option>Business Analytics</option>
+          <option>Financial Management</option>
+          <option>Marketing Management</option>
+          <option>Human Resource Management</option>
+          <option>Operations Management</option>
+          <option>Business Communication</option>
+          <option>Strategic Management</option>
+          <option>Entrepreneurship Development</option>
+        </select>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-field">
+        <label>Department</label>
+        <select id="attDept">
+          <option value="">All Departments</option>
+          <option>MBA - Marketing</option>
+          <option>MBA - Finance</option>
+          <option>MBA - HR Management</option>
+          <option>MBA - Operations</option>
+          <option>MBA - Information Technology</option>
+          <option>MI - Management Information Systems</option>
+          <option>MCA - Computer Applications</option>
+        </select>
+      </div>
+      <div class="sb-divider"></div>
+      <div class="sb-field">
+        <label>Year</label>
+        <select id="attYear">
+          <option value="">All Years</option>
+          <option>First Year</option>
+          <option>Second Year</option>
+        </select>
+      </div>
+      <button class="sb-load-btn" onclick="loadStudents()">
+        Load Students →
+      </button>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-row">
+      <div class="sum-card total"><div class="sum-num" id="s-total">—</div><div class="sum-lbl">Total</div></div>
+      <div class="sum-card present"><div class="sum-num" id="s-present">—</div><div class="sum-lbl">Present</div></div>
+      <div class="sum-card absent"><div class="sum-num" id="s-absent">—</div><div class="sum-lbl">Absent</div></div>
+      <div class="sum-card unmarked"><div class="sum-num" id="s-unmarked">—</div><div class="sum-lbl">Unmarked</div></div>
+      <div class="sum-card pct"><div class="sum-num" id="s-pct">—</div><div class="sum-lbl">% Present</div></div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-bar" id="bulkBar" style="display:none">
+      <span>Quick mark: <strong id="loadedCount">0</strong> students loaded</span>
+      <input class="search-att" type="text" id="searchAtt2" placeholder="🔍  Filter..." oninput="filterRows()" style="width:160px"/>
+      <button class="b-btn all-p" onclick="markAll('present')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        All Present
+      </button>
+      <button class="b-btn all-a" onclick="markAll('absent')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        All Absent
+      </button>
+      <button class="b-btn reset" onclick="resetAll()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        Reset
+      </button>
+    </div>
+
+    <!-- Attendance Table -->
+    <div class="att-table-wrap" id="attTableWrap">
+      <!-- placeholder -->
+      <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+        <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" style="margin:0 auto 14px;display:block;opacity:0.3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <p style="font-size:0.9rem">Select date, subject and click <strong style="color:var(--blue)">Load Students</strong> to begin marking attendance.</p>
+      </div>
+    </div>
+
+    <!-- Attendance History -->
+    <div class="hist-wrap" id="histWrap" style="display:none">
+      <div class="hist-head">
+        <h3>📋 Attendance History</h3>
+        <button class="b-btn reset" onclick="clearHistory()">Clear History</button>
+      </div>
+      <table class="hist-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Subject</th>
+            <th>Department</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Total</th>
+            <th>% Present</th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+const COLORS=['#1a6bff','#a855f7','#00e096','#ffb830','#ff4f4f','#00d4ff','#f43f5e','#10b981'];
+let loadedStudents=[];
+let attStatus={};  // id -> 'present'|'absent'|'unmarked'
+let sessionSubmitted=false;
+
+// Set today's date
+const today=new Date();
+document.getElementById('attDate').value=today.toISOString().split('T')[0];
+
+function getStudents(){return JSON.parse(localStorage.getItem('tgpcms_students')||'[]')}
+
+function loadStudents(){
+  const dept=document.getElementById('attDept').value;
+  const year=document.getElementById('attYear').value;
+  const subj=document.getElementById('attSubject').value;
+  const date=document.getElementById('attDate').value;
+
+  if(!subj){showToast('⚠️ Please select a subject first.');return;}
+  if(!date){showToast('⚠️ Please select a date.');return;}
+
+  let students=getStudents();
+  if(dept) students=students.filter(s=>s.dept===dept);
+  if(year) students=students.filter(s=>s.year===year);
+
+  if(!students.length){
+    showToast('No students found for selected filters.','error');
+    return;
+  }
+
+  loadedStudents=students;
+  attStatus={};
+  students.forEach(s=>{attStatus[s.id]='unmarked';});
+  sessionSubmitted=false;
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('bulkBar').style.display='flex';
+  document.getElementById('loadedCount').textContent=students.length;
+  renderAttTable();
+  updateSummary();
+  showToast(`✅ ${students.length} students loaded!`,'success');
+}
+
+function renderAttTable(){
+  const q=(document.getElementById('searchAtt').value||document.getElementById('searchAtt2').value||'').toLowerCase();
+  const list=loadedStudents.filter(s=>!q||s.name.toLowerCase().includes(q)||s.roll.toLowerCase().includes(q));
+
+  const subj=document.getElementById('attSubject').value||'—';
+  const date=document.getElementById('attDate').value;
+  const dateStr=date?new Date(date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}):'—';
+
+  let html=`<table class="att-table">
+    <thead><tr>
+      <th>#</th>
+      <th>Student</th>
+      <th>Roll No</th>
+      <th>Department</th>
+      <th>Prev. Attendance</th>
+      <th>Mark Status</th>
+      <th>Current Status</th>
+    </tr></thead><tbody>`;
+
+  list.forEach((s,i)=>{
+    const init=s.name.split(' ').map(n=>n[0]).join('').slice(0,2);
+    const col=COLORS[s.id%COLORS.length];
+    const st=attStatus[s.id]||'unmarked';
+    const isPresent=st==='present';
+    const prevColor=s.attendance>=75?'var(--green)':s.attendance>=60?'var(--amber)':'var(--red)';
+    const statusClass=st==='present'?'present':st==='absent'?'absent':'unmarked';
+    const statusLabel=st==='present'?'✓ Present':st==='absent'?'✗ Absent':'— Unmarked';
+
+    html+=`<tr id="row-${s.id}">
+      <td style="color:var(--muted2);font-family:'Space Mono',monospace;font-size:0.72rem">${i+1}</td>
+      <td><div class="name-cell"><div class="std-avatar" style="background:${col}">${init}</div>
+        <div><div>${s.name}</div><div class="std-roll">${s.roll}</div></div></div></td>
+      <td style="font-family:'Space Mono',monospace;font-size:0.76rem;color:var(--muted)">${s.roll}</td>
+      <td style="font-size:0.78rem;color:var(--muted)">${s.dept.replace('MBA - ','')}</td>
+      <td><div class="prev-att">
+        <div class="prev-bar"><div class="prev-fill" style="width:${s.attendance}%;background:${prevColor}"></div></div>
+        <span class="prev-num" style="color:${prevColor}">${s.attendance}%</span>
+      </div></td>
+      <td>
+        <label class="toggle">
+          <input type="checkbox" ${isPresent?'checked':''} onchange="toggleStatus(${s.id},this.checked)"/>
+          <div class="toggle-track">
+            <span class="toggle-label-p">P</span>
+            <span class="toggle-label-a">A</span>
+          </div>
+          <div class="toggle-knob"></div>
+        </label>
+      </td>
+      <td><span class="status-badge ${statusClass}" id="badge-${s.id}">${statusLabel}</span></td>
+    </tr>`;
+  });
+
+  html+=`</tbody></table>`;
+  if(!list.length){
+    html=`<div style="text-align:center;padding:40px;color:var(--muted);font-size:0.88rem">No students match your search.</div>`;
+  }
+  document.getElementById('attTableWrap').innerHTML=html;
+}
+
+function toggleStatus(id,checked){
+  attStatus[id]=checked?'present':'absent';
+  const badge=document.getElementById('badge-'+id);
+  if(badge){
+    badge.className='status-badge '+(checked?'present':'absent');
+    badge.textContent=checked?'✓ Present':'✗ Absent';
+  }
+  updateSummary();
+}
+
+function markAll(status){
+  loadedStudents.forEach(s=>{attStatus[s.id]=status;});
+  renderAttTable();
+  updateSummary();
+}
+
+function resetAll(){
+  loadedStudents.forEach(s=>{attStatus[s.id]='unmarked';});
+  renderAttTable();
+  updateSummary();
+}
+
+function filterRows(){renderAttTable();}
+
+function updateSummary(){
+  const total=loadedStudents.length;
+  const present=Object.values(attStatus).filter(v=>v==='present').length;
+  const absent=Object.values(attStatus).filter(v=>v==='absent').length;
+  const unmarked=Object.values(attStatus).filter(v=>v==='unmarked').length;
+  const marked=present+absent;
+  const pct=marked?Math.round((present/marked)*100)+'%':'—';
+  document.getElementById('s-total').textContent=total||'—';
+  document.getElementById('s-present').textContent=present||'—';
+  document.getElementById('s-absent').textContent=absent||'—';
+  document.getElementById('s-unmarked').textContent=unmarked||'—';
+  document.getElementById('s-pct').textContent=pct;
+}
+
+function submitAttendance(){
+  if(!loadedStudents.length){showToast('No students loaded.','error');return;}
+  const unmarked=Object.values(attStatus).filter(v=>v==='unmarked').length;
+  if(unmarked>0){
+    if(!confirm(`⚠️ ${unmarked} student(s) are still unmarked.\nUnmarked students will be counted as Absent.\nProceed?`))return;
+    loadedStudents.forEach(s=>{if(attStatus[s.id]==='unmarked')attStatus[s.id]='absent';});
+  }
+
+  const date=document.getElementById('attDate').value;
+  const subj=document.getElementById('attSubject').value;
+  const dept=document.getElementById('attDept').value||'All';
+  const present=Object.values(attStatus).filter(v=>v==='present').length;
+  const absent=Object.values(attStatus).filter(v=>v==='absent').length;
+  const total=loadedStudents.length;
+  const pct=Math.round((present/total)*100);
+
+  // Save to history
+  const hist=JSON.parse(localStorage.getItem('tgpcms_att_history')||'[]');
+  hist.unshift({date,subj,dept,present,absent,total,pct,ts:Date.now()});
+  localStorage.setItem('tgpcms_att_history',JSON.stringify(hist.slice(0,50)));
+
+  // Update student attendance %
+  const students=getStudents();
+  loadedStudents.forEach(s=>{
+    const idx=students.findIndex(x=>x.id===s.id);
+    if(idx>=0){
+      const prev=students[idx].attendance||0;
+      students[idx].attendance=Math.round((prev+( attStatus[s.id]==='present'?1:0))/2*100)/100;
+      students[idx].attendance=Math.min(100,Math.max(0,Math.round((prev*0.85)+(attStatus[s.id]==='present'?15:0))));
+    }
+  });
+  localStorage.setItem('tgpcms_students',JSON.stringify(students));
+
+  renderAttTable();
+  updateSummary();
+  loadHistory();
+  document.getElementById('submitBtn').disabled=true;
+  showToast(`✅ Attendance submitted! ${present}/${total} present (${pct}%)`,'success');
+}
+
+function loadHistory(){
+  const hist=JSON.parse(localStorage.getItem('tgpcms_att_history')||'[]');
+  const wrap=document.getElementById('histWrap');
+  if(!hist.length){wrap.style.display='none';return;}
+  wrap.style.display='block';
+  document.getElementById('histBody').innerHTML=hist.map(h=>{
+    const d=new Date(h.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+    const pctColor=h.pct>=75?'var(--green)':h.pct>=60?'var(--amber)':'var(--red)';
+    return `<tr>
+      <td style="font-family:'Space Mono',monospace;font-size:0.78rem">${d}</td>
+      <td>${h.subj}</td>
+      <td style="color:var(--muted);font-size:0.78rem">${h.dept}</td>
+      <td style="color:var(--green);font-family:'Space Mono',monospace">${h.present}</td>
+      <td style="color:var(--red);font-family:'Space Mono',monospace">${h.absent}</td>
+      <td style="font-family:'Space Mono',monospace">${h.total}</td>
+      <td><span style="color:${pctColor};font-family:'Space Mono',monospace;font-weight:700">${h.pct}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function clearHistory(){
+  if(!confirm('Clear all attendance history?'))return;
+  localStorage.removeItem('tgpcms_att_history');
+  loadHistory();
+  showToast('History cleared.','error');
+}
+
+function exportCSV(){
+  if(!loadedStudents.length){showToast('Load students first.','error');return;}
+  const date=document.getElementById('attDate').value;
+  const subj=document.getElementById('attSubject').value||'N/A';
+  let csv='Roll No,Name,Department,Year,Status,Previous Attendance\n';
+  loadedStudents.forEach(s=>{
+    const st=attStatus[s.id]||'unmarked';
+    csv+=`${s.roll},"${s.name}","${s.dept}",${s.year},${st},${s.attendance}%\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`attendance_${subj.replace(/ /g,'_')}_${date}.csv`;
+  a.click();
+  showToast('✅ CSV exported!','success');
+}
+
+let toastTimer;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.className='toast '+(type==='success'?'success':'error');
+  setTimeout(()=>t.classList.add('show'),10);
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+function logout(){sessionStorage.clear();window.location.href='index.html'}
+
+loadHistory();
+</script>
+</body>
+</html>

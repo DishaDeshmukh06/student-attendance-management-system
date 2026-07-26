@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TGPCMS — Attendance Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#020b18;--card:#07192e;--border:#112d4e;
+  --blue:#1a6bff;--blue2:#0f4fcb;--cyan:#00d4ff;
+  --text:#ddeeff;--muted:#4a7090;--muted2:#2a4a65;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Outfit',sans-serif;background:var(--navy);color:var(--text);display:flex;align-items:stretch}
+.bg-canvas{position:fixed;inset:0;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 18% 50%,rgba(26,107,255,0.08) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 80% at 80% 80%,rgba(0,212,255,0.05) 0%,transparent 55%),var(--navy)}
+.grid-lines{position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(26,107,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(26,107,255,0.04) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 70% 70% at 20% 50%,black 0%,transparent 75%)}
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0}
+.orb1{width:440px;height:440px;top:-150px;left:-90px;background:radial-gradient(circle,rgba(26,107,255,0.13) 0%,transparent 70%);animation:of 9s ease-in-out infinite}
+.orb2{width:320px;height:320px;bottom:-60px;left:32%;background:radial-gradient(circle,rgba(0,212,255,0.07) 0%,transparent 70%);animation:of 12s ease-in-out infinite reverse}
+.orb3{width:220px;height:220px;top:28%;right:520px;background:radial-gradient(circle,rgba(26,107,255,0.09) 0%,transparent 70%);animation:of 7s ease-in-out infinite 2s}
+@keyframes of{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-28px) scale(1.06)}}
+.split{position:relative;z-index:1;display:flex;width:100%;height:100%}
+.left{flex:1;display:flex;flex-direction:column;justify-content:center;padding:56px 64px;position:relative;overflow:hidden}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:48px}
+.logo-icon{width:46px;height:46px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;font-family:'Space Mono',monospace;box-shadow:0 0 28px rgba(26,107,255,0.45);flex-shrink:0;letter-spacing:-1px}
+.logo-text{font-size:0.78rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);line-height:1.5}
+.hero-label{display:inline-flex;align-items:center;gap:8px;background:rgba(26,107,255,0.1);border:1px solid rgba(26,107,255,0.25);border-radius:100px;padding:6px 16px;font-size:0.68rem;font-weight:700;letter-spacing:0.13em;text-transform:uppercase;color:var(--cyan);margin-bottom:22px;width:fit-content}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:blink 1.8s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,212,255,0.7)}50%{opacity:0.3;box-shadow:0 0 0 7px rgba(0,212,255,0)}}
+.college-name{font-size:clamp(1.5rem,2.3vw,2.55rem);font-weight:900;line-height:1.12;letter-spacing:-0.02em;margin-bottom:6px;color:#fff}
+.college-name .hl{background:linear-gradient(90deg,var(--blue),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.college-dept{font-size:clamp(0.9rem,1.2vw,1.1rem);font-weight:500;color:rgba(0,212,255,0.7);margin-bottom:16px;letter-spacing:0.01em}
+.college-short{display:inline-block;background:rgba(26,107,255,0.12);border:1px solid rgba(26,107,255,0.3);border-radius:6px;padding:3px 10px;font-family:'Space Mono',monospace;font-size:0.75rem;font-weight:700;color:var(--blue);letter-spacing:0.08em;margin-bottom:20px}
+.college-sub{font-size:0.92rem;font-weight:300;color:var(--muted);line-height:1.8;max-width:400px;margin-bottom:44px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:16px;overflow:hidden;max-width:420px}
+.stat-box{background:var(--card);padding:20px 16px;transition:background 0.2s}
+.stat-box:hover{background:#091e36}
+.stat-num{font-family:'Space Mono',monospace;font-size:1.45rem;font-weight:700;color:var(--blue);letter-spacing:-0.02em;margin-bottom:4px}
+.stat-lbl{font-size:0.66rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)}
+.wm{position:absolute;bottom:40px;left:64px;font-family:'Space Mono',monospace;font-size:0.65rem;color:var(--muted2);letter-spacing:0.08em;opacity:0.5}
+.right{width:490px;min-height:100%;background:var(--card);border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:48px 44px;position:relative;overflow-y:auto}
+.right::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(26,107,255,0.055) 0%,transparent 70%)}
+.panel-eyebrow{font-size:0.66rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--blue);margin-bottom:9px;font-family:'Space Mono',monospace}
+.panel-title{font-size:1.85rem;font-weight:800;letter-spacing:-0.03em;color:#fff;line-height:1.08;margin-bottom:7px}
+.panel-sub{color:var(--muted);font-size:0.85rem;font-weight:400;margin-bottom:28px}
+.role-tabs{display:flex;gap:4px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:26px}
+.rtab{flex:1;text-align:center;padding:9px 6px;border-radius:8px;font-size:0.79rem;font-weight:600;letter-spacing:0.03em;cursor:pointer;color:var(--muted);transition:all 0.22s;user-select:none}
+.rtab.active{background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;box-shadow:0 4px 18px rgba(26,107,255,0.38)}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:0.68rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:7px}
+.iw{position:relative;display:flex;align-items:center}
+.iw .ico{position:absolute;left:13px;width:14px;height:14px;color:var(--muted2);pointer-events:none;transition:color 0.2s;flex-shrink:0}
+.fg input{width:100%;padding:12px 14px 12px 40px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:0.91rem;outline:none;transition:border-color 0.2s,box-shadow 0.2s,background 0.2s}
+.fg input:focus{border-color:var(--blue);background:rgba(26,107,255,0.05);box-shadow:0 0 0 3px rgba(26,107,255,0.12)}
+.fg:focus-within .ico{color:var(--blue)}
+.fg input::placeholder{color:var(--muted2)}
+.eye-btn{position:absolute;right:12px;background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;display:flex;align-items:center;transition:color 0.2s}
+.eye-btn:hover{color:var(--text)}
+.opts{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;font-size:0.81rem}
+.remember{display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--muted)}
+.remember input{accent-color:var(--blue);width:14px;height:14px}
+.forgot{color:var(--cyan);text-decoration:none;font-weight:500}
+.forgot:hover{text-decoration:underline}
+.btn-sign{width:100%;padding:13px;background:linear-gradient(135deg,var(--blue) 0%,var(--blue2) 100%);border:none;border-radius:11px;color:#fff;font-family:'Outfit',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:0.03em;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.15s,box-shadow 0.2s,filter 0.2s;box-shadow:0 6px 24px rgba(26,107,255,0.38)}
+.btn-sign:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(26,107,255,0.5);filter:brightness(1.08)}
+.btn-sign:active{transform:translateY(0);filter:brightness(0.96)}
+.shine{position:absolute;top:0;left:-100%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);transition:left 0.5s}
+.btn-sign:hover .shine{left:150%}
+.err{display:none;align-items:center;gap:8px;background:rgba(220,50,50,0.1);border:1px solid rgba(220,50,50,0.28);border-radius:9px;padding:10px 14px;font-size:0.81rem;color:#ff8585;margin-bottom:14px}
+.err.show{display:flex}
+.divider{display:flex;align-items:center;gap:12px;margin:22px 0;color:var(--muted2);font-size:0.71rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.demo{background:rgba(0,212,255,0.05);border:1px solid rgba(0,212,255,0.16);border-radius:10px;padding:13px 15px}
+.demo-title{font-size:0.64rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:10px;font-family:'Space Mono',monospace}
+.demo-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.demo-row:last-child{margin-bottom:0}
+.demo-role{font-size:0.78rem;color:var(--muted);font-weight:600;min-width:58px}
+.demo-info{display:flex;gap:10px;align-items:center;font-size:0.73rem;color:var(--muted)}
+.demo-info .dv{color:var(--text);font-family:'Space Mono',monospace;font-size:0.7rem}
+.fill-btn{background:none;border:1px solid rgba(26,107,255,0.3);cursor:pointer;font-size:0.66rem;color:var(--blue);padding:2px 9px;border-radius:20px;font-family:'Outfit',sans-serif;font-weight:700;transition:all 0.15s;letter-spacing:0.04em}
+.fill-btn:hover{background:rgba(26,107,255,0.12);color:var(--cyan);border-color:var(--cyan)}
+@media(max-width:900px){.left{display:none}.right{width:100%;padding:40px 24px}}
+</style>
+</head>
+<body>
+<div class="bg-canvas"></div>
+<div class="grid-lines"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="split">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="logo-row">
+      <div class="logo-icon">TGP</div>
+      <div class="logo-text">Student Attendance<br>Management System</div>
+    </div>
+    <div class="hero-label"><span class="live-dot"></span>Academic Year 2025 – 26</div>
+    <h1 class="college-name">Tulsiramji Gayakwad-<br><span class="hl">Patil College of</span><br>Engineering &amp; Technology</h1>
+    <div class="college-dept">Department of Management Studies</div>
+    <div class="college-short">TGPCMS</div>
+    <p class="college-sub">A unified platform to track attendance, manage student records, and monitor academic performance.</p>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-num">5,800+</div><div class="stat-lbl">Students</div></div>
+      <div class="stat-box"><div class="stat-num">220+</div><div class="stat-lbl">Faculty</div></div>
+      <div class="stat-box"><div class="stat-num">38</div><div class="stat-lbl">Depts</div></div>
+    </div>
+    <div class="wm">Nagpur, Maharashtra · Est. 1984</div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="panel-eyebrow">// Secure Access Portal</div>
+    <h2 class="panel-title">Sign In to<br>Your Account</h2>
+    <p class="panel-sub">Select your role and enter your credentials</p>
+
+    <div class="role-tabs">
+      <div class="rtab active" onclick="setRole('admin',this)">⚙ Admin</div>
+      <div class="rtab" onclick="setRole('teacher',this)">📋 Teacher</div>
+      <div class="rtab" onclick="setRole('student',this)">🎓 Student</div>
+    </div>
+
+    <div class="err" id="errBox">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/></svg>
+      <span id="errTxt">Invalid credentials.</span>
+    </div>
+
+    <form onsubmit="handleLogin(event)">
+      <div class="fg">
+        <label>Email Address</label>
+        <div class="iw">
+          <svg class="ico" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <input type="email" id="eml" placeholder="you@tgpcms.edu.in" required/>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <div class="iw">
+          <svg class="ico" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          <input type="password" id="pw" placeholder="Enter your password" required/>
+          <button type="button" class="eye-btn" onclick="toggleEye()">
+            <svg id="eyeIco" width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="opts">
+        <label class="remember"><input type="checkbox"/> Remember me</label>
+        <a href="#" class="forgot">Forgot password?</a>
+      </div>
+      <button type="submit" class="btn-sign">
+        <span class="shine"></span>
+        Sign In &rarr;
+      </button>
+    </form>
+
+    <div class="divider">Quick Demo Access</div>
+
+    <div class="demo">
+      <div class="demo-title">// Demo Credentials</div>
+      <div class="demo-row">
+        <span class="demo-role">Admin</span>
+        <div class="demo-info">
+          <span>admin@tgpcms.edu.in</span>
+          <span class="dv">admin123</span>
+          <button class="fill-btn" onclick="fill('admin@tgpcms.edu.in','admin123')">fill</button>
+        </div>
+      </div>
+      <div class="demo-row">
+        <span class="demo-role">Teacher</span>
+        <div class="demo-info">
+          <span>teacher@tgpcms.edu.in</span>
+          <span class="dv">teacher123</span>
+          <button class="fill-btn" onclick="fill('teacher@tgpcms.edu.in','teacher123')">fill</button>
+        </div>
+      </div>
+      <div class="demo-row">
+        <span class="demo-role">Student</span>
+        <div class="demo-info">
+          <span>student@tgpcms.edu.in</span>
+          <span class="dv">student123</span>
+          <button class="fill-btn" onclick="fill('student@tgpcms.edu.in','student123')">fill</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let role = 'admin';
+const creds = {
+  admin:   { e:'admin@tgpcms.edu.in',   p:'admin123'   },
+  teacher: { e:'teacher@tgpcms.edu.in', p:'teacher123' },
+  student: { e:'student@tgpcms.edu.in', p:'student123' }
+};
+
+function setRole(r, el) {
+  role = r;
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  hideErr();
+}
+
+function toggleEye() {
+  const p = document.getElementById('pw');
+  const i = document.getElementById('eyeIco');
+  if (p.type === 'password') {
+    p.type = 'text';
+    i.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>';
+  } else {
+    p.type = 'password';
+    i.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+  }
+}
+
+function fill(e, p) {
+  document.getElementById('eml').value = e;
+  document.getElementById('pw').value  = p;
+  hideErr();
+}
+
+function showErr(m) {
+  document.getElementById('errTxt').textContent = m;
+  document.getElementById('errBox').classList.add('show');
+}
+
+function hideErr() {
+  document.getElementById('errBox').classList.remove('show');
+}
+
+function handleLogin(e) {
+  e.preventDefault();
+  hideErr();
+  const email = document.getElementById('eml').value.trim();
+  const pw    = document.getElementById('pw').value;
+  const v     = creds[role];
+
+  if (email === v.e && pw === v.p) {
+    sessionStorage.setItem('role',  role);
+    sessionStorage.setItem('email', email);
+    sessionStorage.setItem('name',  role === 'admin' ? 'Admin User' : role === 'teacher' ? 'Prof. Sharma' : 'Student User');
+    window.location.href = 'dashboard.html';
+  } else {
+    showErr('Wrong credentials for ' + role + ' role. Use the fill buttons below.');
+  }
+}
+</script>
+</body>
+</html>
